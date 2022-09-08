@@ -1,28 +1,49 @@
 package com.example.tictactoegame
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.os.Bundle
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.Button
-import android.widget.Toast
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    var mode: String = "onePlayerMode"
+    var mode: String = "nePlayerMode"
 
     lateinit var activePlayer: Player
+
     lateinit var playerX: PlayerX
     lateinit var playerO: PlayerO
+
+    //lateinit var ticTacToeGame: TicTacToeGame
+
+    lateinit var tvScorePlayerX: TextView
+    lateinit var tvScorePlayerO: TextView
+
+    private val positiveButtonClick = { dialog: DialogInterface, which: Int ->
+        resetGame()
+    }
+    private val negativeButtonClick = { dialog: DialogInterface, which: Int ->
+
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        tvScorePlayerX = findViewById(R.id.tv_score_x)
+        tvScorePlayerO = findViewById(R.id.tv_score_o)
+
         playerX = PlayerX()
         playerO = PlayerO()
         activePlayer = playerX
+
+        updateViewsScore()
 
     }
 
@@ -30,38 +51,42 @@ class MainActivity : AppCompatActivity() {
         val btn: Button = view as Button
 
         if (mode.equals("onePlayerMode", true))
-            onePlayerMode(btn)
+            playOnePlayer(btn)
         else
-            twoPlayersMode(btn)
+            playTwoPlayers(btn)
     }
 
     fun playAgain(view: View) {
         resetGame()
     }
 
-    private fun twoPlayersMode(btn: Button) {
-        playGame(btn)
+    private fun playTwoPlayers(btn: Button) {
+        makeMove(btn)
     }
 
-    private fun onePlayerMode(btn: Button) {
-        playGame(btn)
-        autoPlay()
+    private fun playOnePlayer(btn: Button) {
+        if (makeMove(btn))  //found winner
+            return
+        if (autoMakeMove())
+            changeRole()
     }
 
-    private fun playGame(btn: Button) {
+    private fun makeMove(btn: Button): Boolean {
         val btnId = getBtnNum(btn)
 
         activePlayer.plays(btn, btnId)
 
         if (activePlayer.isWon(btnId)) {
-            Toast.makeText(this, "Player ${activePlayer.role} Won!", Toast.LENGTH_SHORT).show()
+            celebrateWinner()
+            return true //play finished
         }
 
         changeRole()
+        return false
     }
 
 
-    private fun autoPlay() {
+    private fun autoMakeMove(): Boolean {
         val emptyTiles = mutableListOf<Int>()
 
         for (i in 1..9) {
@@ -74,9 +99,8 @@ class MainActivity : AppCompatActivity() {
 
         val btn = getButtonByNumber(btnId)
 
-        if (btn != null) {
-            playGame(btn)
-        }
+        return makeMove(btn!!)
+
     }
 
     private fun resetGame() {
@@ -131,5 +155,35 @@ class MainActivity : AppCompatActivity() {
             playerX
     }
 
+    private fun updateViewsScore() {
+
+        tvScorePlayerO.text = playerO.score.toString()
+        tvScorePlayerO.setTextColor(ContextCompat.getColor(this, playerO.color))
+
+        tvScorePlayerX.text = playerX.score.toString()
+        tvScorePlayerX.setTextColor(ContextCompat.getColor(this, playerX.color))
+
+    }
+
+    private fun celebrateWinner() {
+        activePlayer.score++
+        updateViewsScore()
+        showAlertDialog()
+    }
+
+    private fun showAlertDialog() {
+
+        val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
+
+        with(builder)
+        {
+            setTitle("Congratulations!")
+            setMessage("Player ${activePlayer.role} Won!")
+            setPositiveButton("Play again", positiveButtonClick)
+            setNegativeButton("Ok", negativeButtonClick)
+            show()
+        }
+
+    }
 
 }

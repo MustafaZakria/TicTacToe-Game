@@ -11,6 +11,8 @@ abstract class Player {
     abstract var color: Int
     abstract var role: String
 
+    var score: Int = 0
+
     fun isWon(btnId: Int): Boolean {
         //row
         val quotient: Int = (btnId - 1) / 3
