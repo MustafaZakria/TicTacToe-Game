@@ -3,6 +3,7 @@ package com.example.tictactoegame
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.Button
@@ -13,24 +14,18 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    var mode: String = "nePlayerMode"
-
-    lateinit var activePlayer: Player
-
-    lateinit var playerX: PlayerX
-    lateinit var playerO: PlayerO
-
-    //lateinit var ticTacToeGame: TicTacToeGame
+    lateinit var ticTacToeGame: TicTacToeGame
+    private val mode: String = "onePlayerMode"
 
     lateinit var tvScorePlayerX: TextView
     lateinit var tvScorePlayerO: TextView
 
-    private val positiveButtonClick = { dialog: DialogInterface, which: Int ->
-        resetGame()
-    }
-    private val negativeButtonClick = { dialog: DialogInterface, which: Int ->
+    lateinit var btnPlayAgain: Button
 
+    private val positiveButtonClick = { dialog: DialogInterface, which: Int ->
+        playAgain()
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,71 +34,22 @@ class MainActivity : AppCompatActivity() {
         tvScorePlayerX = findViewById(R.id.tv_score_x)
         tvScorePlayerO = findViewById(R.id.tv_score_o)
 
-        playerX = PlayerX()
-        playerO = PlayerO()
-        activePlayer = playerX
+        btnPlayAgain = findViewById(R.id.btn_play_again)
+
+        ticTacToeGame = if (mode.equals("onePlayerMode", true))
+            OfflineOnePlayerGame()
+        else
+            OfflineTwoPlayersGame()
 
         updateViewsScore()
 
-    }
-
-    fun btnClick(view: View) {
-        val btn: Button = view as Button
-
-        if (mode.equals("onePlayerMode", true))
-            playOnePlayer(btn)
-        else
-            playTwoPlayers(btn)
-    }
-
-    fun playAgain(view: View) {
-        resetGame()
-    }
-
-    private fun playTwoPlayers(btn: Button) {
-        makeMove(btn)
-    }
-
-    private fun playOnePlayer(btn: Button) {
-        if (makeMove(btn))  //found winner
-            return
-        if (autoMakeMove())
-            changeRole()
-    }
-
-    private fun makeMove(btn: Button): Boolean {
-        val btnId = getBtnNum(btn)
-
-        activePlayer.plays(btn, btnId)
-
-        if (activePlayer.isWon(btnId)) {
-            celebrateWinner()
-            return true //play finished
+        btnPlayAgain.setOnClickListener {
+            playAgain()
         }
 
-        changeRole()
-        return false
     }
 
-
-    private fun autoMakeMove(): Boolean {
-        val emptyTiles = mutableListOf<Int>()
-
-        for (i in 1..9) {
-            if (!(playerO.tilesPlayed.contains(i) || playerX.tilesPlayed.contains(i)))
-                emptyTiles.add(i)
-        }
-
-        val randomIndex = Random().nextInt(emptyTiles.size) //non-negative number less than size
-        val btnId = emptyTiles[randomIndex]
-
-        val btn = getButtonByNumber(btnId)
-
-        return makeMove(btn!!)
-
-    }
-
-    private fun resetGame() {
+    private fun playAgain() {
         var btn: Button?
         for (i in 1..9) {
             btn = getButtonByNumber(i)
@@ -112,9 +58,42 @@ class MainActivity : AppCompatActivity() {
             btn?.setBackgroundColor(ContextCompat.getColor(this, R.color.gray))
         }
 
-        playerX.tilesPlayed.clear()
-        playerO.tilesPlayed.clear()
+        ticTacToeGame.resetGame()
     }
+
+    fun btnClick(view: View) {
+        val btn: Button = view as Button
+
+        val tileNumber = getTileNum(btn)
+
+        val winner: Player? = ticTacToeGame.playGame(tileNumber)
+
+        colorTiles()
+
+        if( winner!=null) {
+            celebrateWinner(winner)
+        }
+
+    }
+
+    private fun colorTiles() {
+        var player: Player = ticTacToeGame.playerX
+        var tileNumber: Int = player.tilesPlayed.last()
+        var btn = getButtonByNumber(tileNumber)
+
+
+
+        for(i in 0..1) {
+            btn?.isClickable = false
+            btn?.text = player.role
+            btn?.setBackgroundColor(ContextCompat.getColor(this, player.color))
+
+            player = ticTacToeGame.playerO
+            tileNumber = player.tilesPlayed.last()
+            btn = getButtonByNumber(tileNumber)
+        }
+    }
+
 
     private fun getButtonByNumber(number: Int): Button? {
         return when (number) {
@@ -131,7 +110,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getBtnNum(btn: Button): Int {
+    private fun getTileNum(btn: Button): Int {
         var btnId: Int = when (btn.id) {
             R.id.btn1 -> 1
             R.id.btn2 -> 2
@@ -148,14 +127,11 @@ class MainActivity : AppCompatActivity() {
         return btnId
     }
 
-    private fun changeRole() {
-        activePlayer = if (activePlayer is PlayerX)
-            playerO
-        else
-            playerX
-    }
 
     private fun updateViewsScore() {
+
+        val playerX = ticTacToeGame.playerX
+        val playerO = ticTacToeGame.playerO
 
         tvScorePlayerO.text = playerO.score.toString()
         tvScorePlayerO.setTextColor(ContextCompat.getColor(this, playerO.color))
@@ -165,22 +141,21 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun celebrateWinner() {
-        activePlayer.score++
+    private fun celebrateWinner(winner: Player) {
         updateViewsScore()
-        showAlertDialog()
+        showAlertDialog(winner)
     }
 
-    private fun showAlertDialog() {
+    private fun showAlertDialog(winner: Player) {
 
         val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
 
         with(builder)
         {
             setTitle("Congratulations!")
-            setMessage("Player ${activePlayer.role} Won!")
+            setMessage("Player ${winner.role} Won!")
             setPositiveButton("Play again", positiveButtonClick)
-            setNegativeButton("Ok", negativeButtonClick)
+            setNegativeButton("Ok",null)
             show()
         }
 

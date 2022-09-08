@@ -13,9 +13,9 @@ abstract class Player {
 
     var score: Int = 0
 
-    fun isWon(btnId: Int): Boolean {
+    fun isWon(tileNumber: Int): Boolean {
         //row
-        val quotient: Int = (btnId - 1) / 3
+        val quotient: Int = (tileNumber - 1) / 3
         var rowVictory: Boolean = true
         for (i in 1..3) {
             if (!tilesPlayed.contains((quotient * 3) + i))
@@ -23,7 +23,7 @@ abstract class Player {
         }
 
         //column
-        var reminder: Int = btnId % 3
+        var reminder: Int = tileNumber % 3
         if (reminder == 0)
             reminder = 3
         var columnVictory: Boolean = true
@@ -43,16 +43,16 @@ abstract class Player {
         return (rowVictory || columnVictory || diagonalVictory)
     }
 
-    fun plays(btn: Button, btnId: Int) {
+    fun plays(tileNumber: Int) {   //btn: Button,
 
-        btn.isClickable = false
-        //btn.isEnabled = false
-        btn.text = this.role
-        //btn.setBackgroundResource(this.color)
-        btn.setBackgroundColor(getColor(btn.context, this.color))
-        tilesPlayed.add(btnId)
+        //btn.isClickable = false
+        //btn.text = this.role
+        //btn.setBackgroundColor(getColor(btn.context, this.color))
+        tilesPlayed.add(tileNumber)
 
     }
+
+
 }
 
 class PlayerX : Player() {
