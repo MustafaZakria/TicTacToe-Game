@@ -49,7 +49,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".MainActivity"
+        tools:context=".ui.MainActivity"
         android:layout_marginTop="30pt">
 
 
@@ -149,9 +149,8 @@
         android:id="@+id/btn_play_again"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/play_again"
         android:layout_marginTop="10pt"
-        />
+        android:text="@string/play_again" />
 
 </LinearLayout>
 

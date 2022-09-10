@@ -1,21 +1,24 @@
-package com.example.tictactoegame
+package com.example.tictactoegame.ui
 
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import java.util.*
+import com.example.tictactoegame.*
+import com.example.tictactoegame.classes.OfflineOnePlayerGame
+import com.example.tictactoegame.classes.OfflineTwoPlayersGame
+import com.example.tictactoegame.classes.Player
+import com.example.tictactoegame.classes.TicTacToeGame
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var ticTacToeGame: TicTacToeGame
-    private val mode: String = "onePlayerMode"
+    lateinit var mode: String
 
     lateinit var tvScorePlayerX: TextView
     lateinit var tvScorePlayerO: TextView
@@ -26,7 +29,6 @@ class MainActivity : AppCompatActivity() {
         playAgain()
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -34,19 +36,18 @@ class MainActivity : AppCompatActivity() {
         tvScorePlayerX = findViewById(R.id.tv_score_x)
         tvScorePlayerO = findViewById(R.id.tv_score_o)
 
-        btnPlayAgain = findViewById(R.id.btn_play_again)
-
+        mode = getGameMode()
         ticTacToeGame = if (mode.equals("onePlayerMode", true))
             OfflineOnePlayerGame()
         else
             OfflineTwoPlayersGame()
 
-        updateViewsScore()
-
+        btnPlayAgain = findViewById(R.id.btn_play_again)
         btnPlayAgain.setOnClickListener {
             playAgain()
         }
 
+        updateViewsScore()
     }
 
     private fun playAgain() {
@@ -89,6 +90,9 @@ class MainActivity : AppCompatActivity() {
             btn?.setBackgroundColor(ContextCompat.getColor(this, player.color))
 
             player = ticTacToeGame.playerO
+            if(player.tilesPlayed.isEmpty()) {
+                break
+            }
             tileNumber = player.tilesPlayed.last()
             btn = getButtonByNumber(tileNumber)
         }
@@ -159,6 +163,16 @@ class MainActivity : AppCompatActivity() {
             show()
         }
 
+    }
+
+    fun getGameMode(): String {
+        var mode: String = ""
+        val extras = intent.extras
+
+        if (extras != null) {
+            mode = extras.getString("mode").toString()
+        }
+        return mode
     }
 
 }

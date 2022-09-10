@@ -1,8 +1,6 @@
-package com.example.tictactoegame
+package com.example.tictactoegame.classes
 
-import android.widget.Button
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getColor
+import com.example.tictactoegame.R
 
 abstract class Player {
 

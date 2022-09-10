@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Tic Tac Toe game</string>
     <string name="play_again">Play Again!</string>
+    <string name="offline_one_player">Offline one player mode</string>
+    <string name="offline_two_players">Offline two players mode</string>
+    <string name="online">online mode</string>
 </resources>
