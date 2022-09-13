@@ -1,16 +1,29 @@
 package com.example.tictactoegame.classes
 
+import android.util.Log
+import com.example.tictactoegame.R
 import java.util.*
 
-abstract class TicTacToeGame {
+abstract class TicTacToeGame(player1: Player) {
 
     var activePlayer: Player
 
-    var playerX: PlayerX = PlayerX()
-    var playerO: PlayerO = PlayerO()
+    var player1: Player
+    lateinit var player2: Player
 
     init {
-        activePlayer = playerX
+        this.player1 = player1
+
+        activePlayer = player1
+
+        player1.role = "X"
+        player1.color = R.color.blue
+    }
+
+    constructor(player1: Player, player2: Player) : this(player1) {
+        this.player2 = player2
+        player1.role = "O"
+        player1.color = R.color.red
     }
 
     abstract fun playGame(tileNumber: Int): Player?
@@ -30,10 +43,10 @@ abstract class TicTacToeGame {
 
 
     fun changeRole() {
-        activePlayer = if (activePlayer is PlayerX)
-            playerO
+        activePlayer = if (activePlayer == player1)
+            player2
         else
-            playerX
+            player1
     }
 
     private fun increaseWinnerScore() {
@@ -48,14 +61,19 @@ abstract class TicTacToeGame {
 
     fun resetGame() {
 
-
-
-        playerX.tilesPlayed.clear()
-        playerO.tilesPlayed.clear()
+        player1.tilesPlayed.clear()
+        player2.tilesPlayed.clear()
     }
 }
 
-class OfflineOnePlayerGame : TicTacToeGame() {
+class OfflineOnePlayerGame(player1: Player) : TicTacToeGame(player1) {
+
+    init {
+        val player2 = Player(name = "AI")
+        player2.role = "O"
+        player2.color = R.color.red
+        this.player2 = player2
+    }
 
     override fun playGame(tileNumber: Int): Player? {
 
@@ -77,11 +95,11 @@ class OfflineOnePlayerGame : TicTacToeGame() {
         val emptyTiles = mutableListOf<Int>()
 
         for (i in 1..9) {
-            if (!(playerO.tilesPlayed.contains(i) || playerX.tilesPlayed.contains(i)))
+            if (!(player2.tilesPlayed.contains(i) || player1.tilesPlayed.contains(i)))
                 emptyTiles.add(i)
         }
 
-        if(emptyTiles.isEmpty()) {
+        if (emptyTiles.isEmpty()) {
             changeRole()
             return false
         }
@@ -97,11 +115,26 @@ class OfflineOnePlayerGame : TicTacToeGame() {
 
 }
 
-class OfflineTwoPlayersGame : TicTacToeGame() {
+class OfflineTwoPlayersGame(player1: Player, player2: Player) : TicTacToeGame(player1, player2) {
 
     override fun playGame(tileNumber: Int): Player? {
         if (makeMove(tileNumber))
             return activePlayer
         return null
     }
+}
+
+class OnlineGame(player1: Player) : TicTacToeGame(player1) {
+
+    init {
+        val player2 = Player(name = "AI")
+        player2.role = "O"
+        player2.color = R.color.red
+        this.player2 = player2
+    }
+
+    override fun playGame(tileNumber: Int): Player? {
+        TODO("Not yet implemented")
+    }
+
 }

@@ -1,26 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:layout_width="match_parent"
+<LinearLayout android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center_horizontal"
     android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/layout_online"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="3pt"
+        android:visibility="visible">
+
+        <EditText
+            android:id="@+id/et_email"
+            android:layout_width="88pt"
+            android:layout_height="wrap_content"
+            android:hint="@string/email"
+            android:inputType="textPersonName"
+            android:padding="5pt"
+            android:layout_marginRight="3pt"/>
+
+        <Button
+            android:id="@+id/btn_request"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/request"
+            android:textAllCaps="false"
+            android:layout_marginRight="3pt"
+            android:onClick="btnRequestEvent"/>
+
+        <Button
+            android:id="@+id/btn_accept"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/accept"
+            android:textAllCaps="false"
+            android:onClick="btnAcceptEvent"
+            android:backgroundTint="@color/green" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/tv_player1_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:gravity="center"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/tv_player2_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:gravity="center"
+            android:layout_weight="1" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="2.5"
-        android:layout_marginTop="30pt">
+        >
 
         <TextView
             android:id="@+id/tv_score_x"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="50sp"
-            android:gravity="start"
-            android:layout_weight="1"
-            android:paddingStart="30pt"/>
+            android:gravity="center"
+            android:layout_weight="1" />
         <TextView
             android:id="@+id/tv_colon"
             android:layout_width="wrap_content"
@@ -37,9 +96,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="50sp"
-            android:gravity="end"
-            android:layout_weight="1"
-            android:paddingEnd="30pt"/>
+            android:gravity="center"
+            android:layout_weight="1" />
 
     </LinearLayout>
 
@@ -49,8 +107,8 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".ui.MainActivity"
-        android:layout_marginTop="30pt">
+        tools:context=".ui.GameActivity"
+        android:layout_marginTop="12pt">
 
 
         <TableRow
@@ -149,7 +207,7 @@
         android:id="@+id/btn_play_again"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10pt"
+        android:layout_marginTop="7pt"
         android:text="@string/play_again" />
 
 </LinearLayout>

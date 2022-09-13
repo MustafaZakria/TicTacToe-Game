@@ -4,4 +4,11 @@
     <string name="offline_one_player">Offline one player mode</string>
     <string name="offline_two_players">Offline two players mode</string>
     <string name="online">online mode</string>
+    <string name="username">Username</string>
+    <string name="email">Enter email</string>
+    <string name="password">Enter password</string>
+    <string name="register">Register</string>
+    <string name="game_name">TicTacToe</string>
+    <string name="request">request</string>
+    <string name="accept">accept</string>
 </resources>

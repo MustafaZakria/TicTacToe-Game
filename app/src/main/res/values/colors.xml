@@ -11,4 +11,5 @@
     <color name="red">#FF0000</color>
     <color name="blue">#0000FF</color>
     <color name="holo_blue">@android:color/holo_blue_dark</color>
+    <color name="green">#33C033</color>
 </resources>

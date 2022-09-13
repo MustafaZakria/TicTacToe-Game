@@ -1,15 +1,16 @@
 package com.example.tictactoegame.classes
 
-import com.example.tictactoegame.R
-
-abstract class Player {
+class Player(var name: String , var email: String = "null") {
 
     var tilesPlayed: MutableList<Int> = mutableListOf()
 
-    abstract var color: Int
-    abstract var role: String
+    var color: Int = 0
+
+    lateinit var role: String
 
     var score: Int = 0
+
+
 
     fun isWon(tileNumber: Int): Boolean {
         //row
@@ -53,14 +54,14 @@ abstract class Player {
 
 }
 
-class PlayerX : Player() {
-
-    override var color: Int = R.color.blue
-    override var role: String = "X"
-}
-
-class PlayerO : Player() {
-
-    override var color: Int = R.color.red
-    override var role: String = "O"
-}
+//class PlayerX : Player() {
+//
+//    override var color: Int = R.color.blue
+//    override var role: String = "X"
+//}
+//
+//class PlayerO : Player() {
+//
+//    override var color: Int = R.color.red
+//    override var role: String = "O"
+//}
