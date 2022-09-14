@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.text.Layout
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.Button
@@ -65,8 +66,9 @@ class GameActivity : AppCompatActivity() {
         else if (mode.equals("twoPlayersMode", true))
             ticTacToeGame = OfflineTwoPlayersGame(mainPlayer, Player("player2"))
         else {
-            ticTacToeGame = OnlineGame(mainPlayer)
+            ticTacToeGame = OnlineGame(mainPlayer, Player("player2"))
             onlineGameUI()
+            listenToIncomingCalls()
         }
 
         btnPlayAgain = findViewById(R.id.btn_play_again)
@@ -94,13 +96,15 @@ class GameActivity : AppCompatActivity() {
 
         val tileNumber = getTileNum(btn)
 
-        val winner: Player? = ticTacToeGame.playGame(tileNumber)
+//        val winner: Player? = ticTacToeGame.playGame(tileNumber)
+//
+//        updateTiles()
+//
+//        if( winner!=null) {
+//            celebrateWinner(winner)
+//        }
 
-        updateTiles()
-
-        if( winner!=null) {
-            celebrateWinner(winner)
-        }
+        myRef.child("PlayerOnline").child(sessionID).child(tileNumber.toString()).setValue(myEmail)
 
     }
 
@@ -219,12 +223,52 @@ class GameActivity : AppCompatActivity() {
     //ONLINE GAME
     fun btnRequestEvent(view: View) {
         val otherUserEmail = etEmail.text.toString()
-        myRef.child("Users").child(otherUserEmail).child("Request").push().setValue(myEmail)
+        myRef.child("Users").child(splitString(otherUserEmail)).child("Request").push().setValue(myEmail)
+
+        playOnline(splitString(myEmail)+splitString(otherUserEmail))
     }
 
     fun btnAcceptEvent(view: View) {
         val otherUserEmail = etEmail.text.toString()
-        myRef.child("Users").child(otherUserEmail).child("Request").push().setValue(myEmail)
+        myRef.child("Users").child(splitString(otherUserEmail)).child("Request").push().setValue(myEmail)
+
+        playOnline(splitString(otherUserEmail)+splitString(myEmail))
+    }
+
+    lateinit var sessionID: String
+
+    fun playOnline(sessionID: String) {
+        this.sessionID = sessionID
+        myRef.child("PlayerOnline").child(sessionID)
+            .addValueEventListener(object: ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    ticTacToeGame.resetGame()
+                    try {
+                        val td = snapshot.value as HashMap<String, Any>
+                        if(td!=null) {
+                            var value: String
+                            for(key in td.keys) {
+                                value = td[key] as String
+
+                                if(value!=myEmail) {
+
+                                }
+                                else {
+
+                                }
+
+                                ticTacToeGame.makeMove(key.toInt())
+                                updateTiles()
+                            }
+                        }
+                    }catch (ex: Exception){}
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.d("***", error.toString())
+                }
+
+            })
     }
 
     fun onlineGameUI() {
@@ -239,7 +283,7 @@ class GameActivity : AppCompatActivity() {
                     try {
                         val td = snapshot.value as HashMap<String, Any>
                         if(td!=null) {
-                            var value: String
+                            val value: String
                             for(key in td.keys) {
                                 value = td[key] as String
                                 etEmail.setText(value)
@@ -251,7 +295,7 @@ class GameActivity : AppCompatActivity() {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    TODO("Not yet implemented")
+                    Log.d("***", error.toString())
                 }
 
             })

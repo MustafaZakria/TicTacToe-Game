@@ -22,8 +22,8 @@ abstract class TicTacToeGame(player1: Player) {
 
     constructor(player1: Player, player2: Player) : this(player1) {
         this.player2 = player2
-        player1.role = "O"
-        player1.color = R.color.red
+        player2.role = "O"
+        player2.color = R.color.red
     }
 
     abstract fun playGame(tileNumber: Int): Player?
@@ -55,9 +55,6 @@ abstract class TicTacToeGame(player1: Player) {
         //showAlertDialog()
     }
 
-    fun playAgain() {
-        resetGame()
-    }
 
     fun resetGame() {
 
@@ -124,17 +121,12 @@ class OfflineTwoPlayersGame(player1: Player, player2: Player) : TicTacToeGame(pl
     }
 }
 
-class OnlineGame(player1: Player) : TicTacToeGame(player1) {
+class OnlineGame(player1: Player, player2: Player) : TicTacToeGame(player1, player2) {
 
-    init {
-        val player2 = Player(name = "AI")
-        player2.role = "O"
-        player2.color = R.color.red
-        this.player2 = player2
-    }
+
 
     override fun playGame(tileNumber: Int): Player? {
-        TODO("Not yet implemented")
+        return null
     }
 
 }
