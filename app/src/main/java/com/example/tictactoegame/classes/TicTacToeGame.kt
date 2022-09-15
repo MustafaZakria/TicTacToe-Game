@@ -2,6 +2,8 @@ package com.example.tictactoegame.classes
 
 import android.util.Log
 import com.example.tictactoegame.R
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import java.util.*
 
 abstract class TicTacToeGame(player1: Player) {
@@ -10,6 +12,9 @@ abstract class TicTacToeGame(player1: Player) {
 
     var player1: Player
     lateinit var player2: Player
+
+    private val database = Firebase.database
+    val myRef = database.reference
 
     init {
         this.player1 = player1
@@ -37,7 +42,7 @@ abstract class TicTacToeGame(player1: Player) {
             return true //winner found
         }
 
-        changeRole()
+        //changeRole()
         return false
     }
 
@@ -56,7 +61,7 @@ abstract class TicTacToeGame(player1: Player) {
     }
 
 
-    fun resetGame() {
+    open fun resetGame() {
 
         player1.tilesPlayed.clear()
         player2.tilesPlayed.clear()
@@ -127,6 +132,11 @@ class OnlineGame(player1: Player, player2: Player) : TicTacToeGame(player1, play
 
     override fun playGame(tileNumber: Int): Player? {
         return null
+    }
+
+    override fun resetGame() {
+        super.resetGame()
+        myRef.child("PlayerOnline").removeValue()
     }
 
 }
