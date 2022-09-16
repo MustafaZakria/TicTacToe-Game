@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="3pt"
-        android:visibility="visible">
+        android:visibility="invisible">
 
         <EditText
             android:id="@+id/et_email"

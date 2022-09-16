@@ -13,6 +13,7 @@ class Player(var name: String , var email: String = "null") {
 
 
     fun isWon(tileNumber: Int): Boolean {
+        //tilesPlayed = tilesPlayed.distinct() as MutableList<Int>
         //row
         val quotient: Int = (tileNumber - 1) / 3
         var rowVictory: Boolean = true

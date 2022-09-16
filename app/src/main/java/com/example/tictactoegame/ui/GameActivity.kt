@@ -19,6 +19,10 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
+
+lateinit var sessionID: String
+lateinit var myEmail: String
+
 class GameActivity : AppCompatActivity() {
 
     private val database = Firebase.database
@@ -26,12 +30,10 @@ class GameActivity : AppCompatActivity() {
 
     lateinit var ticTacToeGame: TicTacToeGame
     lateinit var mode: String
-    lateinit var myEmail: String
     lateinit var mainPlayer: Player
 
+
     lateinit var etEmail: EditText
-
-
     lateinit var tvScorePlayer1: TextView
     lateinit var tvScorePlayer2: TextView
 
@@ -65,7 +67,7 @@ class GameActivity : AppCompatActivity() {
         else if (mode.equals("twoPlayersMode", true))
             ticTacToeGame = OfflineTwoPlayersGame(mainPlayer, Player("player2"))
         else {
-//            ticTacToeGame = OnlineGame(Player("player1"), Player("player2"))
+            ticTacToeGame = OnlineGame(Player("player1"), Player("player2"))
             onlineGameUI()
             listenToIncomingCalls()
         }
@@ -87,7 +89,7 @@ class GameActivity : AppCompatActivity() {
             btn?.setBackgroundColor(ContextCompat.getColor(this, R.color.gray))
         }
 
-        ticTacToeGame.resetGame()
+        ticTacToeGame.playAgain()
     }
 
     fun btnClick(view: View) {
@@ -95,41 +97,18 @@ class GameActivity : AppCompatActivity() {
 
         val tileNumber = getTileNum(btn)
 
-        //if(mode == "onlineMode")
-        //fun
-        //else
+        val winner: Player? = ticTacToeGame.playGame(tileNumber)
 
+        updateTiles()
 
-//        val winner: Player? = ticTacToeGame.playGame(tileNumber)
-//
-//        updateTiles()
-//
-//        if( winner!=null) {
-//            celebrateWinner(winner)
-//        }
-
-        myRef.child("PlayerOnline").child(sessionID).child(numToString(tileNumber)).setValue(myEmail)
-
-    }
-
-    fun numToString(num: Int): String{
-        val str = when(num) {
-            1 -> "one"
-            2 -> "two"
-            3 -> "three"
-            4 -> "four"
-            5 -> "five"
-            6 -> "six"
-            7 -> "seven"
-            8 -> "eight"
-            9 -> "nine"
-            else -> ""
+        if (winner != null) {
+            showResultMsg(winner)
         }
-        return str
+
     }
 
-    fun stringToNum(str: String): Int{
-        val num = when(str) {
+    fun stringToNum(str: String): Int {
+        val num = when (str) {
             "one" -> 1
             "two" -> 2
             "three" -> 3
@@ -146,20 +125,24 @@ class GameActivity : AppCompatActivity() {
 
     private fun updateTiles() {
         var player: Player = ticTacToeGame.player1
-        var tileNumber: Int = player.tilesPlayed.last()
-        var btn = getButtonByNumber(tileNumber)
+        var tileNumber: Int
+        var btn: Button?
+        for (i in 0 until player.tilesPlayed.size) {
+            tileNumber = player.tilesPlayed[i]
+            btn = getButtonByNumber(tileNumber)
 
-        for (i in 0..1) {
             btn?.isClickable = false
             btn?.text = player.role
             btn?.setBackgroundColor(ContextCompat.getColor(this, player.color))
-
-            player = ticTacToeGame.player2
-            if (player.tilesPlayed.isEmpty()) {
-                break
-            }
-            tileNumber = player.tilesPlayed.last()
+        }
+        player = ticTacToeGame.player2
+        for (i in 0 until player.tilesPlayed.size) {
+            tileNumber = player.tilesPlayed[i]
             btn = getButtonByNumber(tileNumber)
+
+            btn?.isClickable = false
+            btn?.text = player.role
+            btn?.setBackgroundColor(ContextCompat.getColor(this, player.color))
         }
     }
 
@@ -216,14 +199,16 @@ class GameActivity : AppCompatActivity() {
 
     }
 
-    private fun showWinnerMsg(winner: Player) {
+    private fun showResultMsg(winner: Player) {
         updateUI()
-        winnerAlertDialog(winner)
-    }
-
-    private fun showLoserMsg(loser: Player) {
-        updateUI()
-        loserAlertDialog(loser)
+        if (winner.email == myEmail)
+            winnerAlertDialog(winner)
+        else {
+            if (winner == ticTacToeGame.player1)
+                loserAlertDialog(ticTacToeGame.player2)
+            else
+                loserAlertDialog(ticTacToeGame.player1)
+        }
     }
 
     private fun winnerAlertDialog(winner: Player) {
@@ -282,9 +267,9 @@ class GameActivity : AppCompatActivity() {
         myRef.child("Users").child(splitString(otherUserEmail)).child("Request").push()
             .setValue(myEmail)
 
-        //ticTacToeGame.player1 = mainPlayer
-        ticTacToeGame = OnlineGame(mainPlayer, Player(splitString(otherUserEmail), otherUserEmail))
-        playerType = "player1"
+        ticTacToeGame.setPlayerOne(mainPlayer)
+        ticTacToeGame.setPlayerTwo(Player(splitString(otherUserEmail), otherUserEmail))
+        updateUI()
 
         playOnline(splitString(myEmail) + splitString(otherUserEmail))
     }
@@ -294,18 +279,15 @@ class GameActivity : AppCompatActivity() {
         myRef.child("Users").child(splitString(otherUserEmail)).child("Request").push()
             .setValue(myEmail)
 
-        //ticTacToeGame.player2 = mainPlayer
-        ticTacToeGame = OnlineGame(Player(splitString(otherUserEmail), otherUserEmail), mainPlayer)
-        playerType = "player2"
+        ticTacToeGame.setPlayerTwo(mainPlayer)
+        ticTacToeGame.setPlayerOne(Player(splitString(otherUserEmail), otherUserEmail))
+        updateUI()
 
         playOnline(splitString(otherUserEmail) + splitString(myEmail))
     }
 
-    lateinit var sessionID: String
-    lateinit var playerType: String
-
-    fun playOnline(sessionID: String) {
-        this.sessionID = sessionID
+    private fun playOnline(sessionId: String) {
+        sessionID = sessionId
         myRef.child("PlayerOnline").removeValue()
         myRef.child("PlayerOnline").child(sessionID)
             .addValueEventListener(object : ValueEventListener {
@@ -317,15 +299,6 @@ class GameActivity : AppCompatActivity() {
                         for (key in td.keys) {
                             value = td[key] as String
 
-//                            if(value!=myEmail) {
-//                                ticTacToeGame.activePlayer =
-//                                    if(playerType === "player1") ticTacToeGame.player2 else ticTacToeGame.player1   //myEmail === ticTacToeGame.player1.email
-//                            }
-//                            else {
-//                                ticTacToeGame.activePlayer =
-//                                    if(playerType === "player1") ticTacToeGame.player1 else ticTacToeGame.player2
-//                            }
-
                             if (ticTacToeGame.activePlayer.email == myEmail) {
                                 if (value != myEmail)
                                     ticTacToeGame.changeRole()
@@ -335,14 +308,11 @@ class GameActivity : AppCompatActivity() {
                             }
 
                             val isWinnerExist = ticTacToeGame.makeMove(stringToNum(key))
+
                             updateTiles()
-                            if (isWinnerExist && myEmail == ticTacToeGame.activePlayer.email) {
-                                showWinnerMsg(ticTacToeGame.activePlayer)
-                            } else {
-                                if (ticTacToeGame.activePlayer == ticTacToeGame.player1)
-                                    showLoserMsg(ticTacToeGame.player2)
-                                else
-                                    showLoserMsg(ticTacToeGame.player1)
+
+                            if (isWinnerExist) {
+                                showResultMsg(ticTacToeGame.activePlayer)
                             }
                         }
                     } catch (ex: Exception) {
@@ -352,7 +322,6 @@ class GameActivity : AppCompatActivity() {
                 override fun onCancelled(error: DatabaseError) {
                     Log.d("***", error.toString())
                 }
-
             })
     }
 
@@ -380,11 +349,9 @@ class GameActivity : AppCompatActivity() {
                     } catch (ex: Exception) {
                     }
                 }
-
                 override fun onCancelled(error: DatabaseError) {
                     Log.d("***", error.toString())
                 }
-
             })
     }
 

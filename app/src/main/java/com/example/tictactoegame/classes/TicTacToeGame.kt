@@ -2,6 +2,8 @@ package com.example.tictactoegame.classes
 
 import android.util.Log
 import com.example.tictactoegame.R
+import com.example.tictactoegame.ui.myEmail
+import com.example.tictactoegame.ui.sessionID
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.util.*
@@ -31,7 +33,22 @@ abstract class TicTacToeGame(player1: Player) {
         player2.color = R.color.red
     }
 
+    fun setPlayerOne(player: Player) {
+        player1 = player
+        activePlayer = player1
+
+        player1.role = "X"
+        player1.color = R.color.blue
+    }
+
+    fun setPlayerTwo(player: Player) {
+        player2 = player
+        player2.role = "O"
+        player2.color = R.color.red
+    }
+
     abstract fun playGame(tileNumber: Int): Player?
+    abstract fun playAgain()
 
     fun makeMove(tileNumber: Int): Boolean {
 
@@ -42,10 +59,9 @@ abstract class TicTacToeGame(player1: Player) {
             return true //winner found
         }
 
-        //changeRole()
+        changeRole()
         return false
     }
-
 
     fun changeRole() {
         activePlayer = if (activePlayer == player1)
@@ -56,8 +72,6 @@ abstract class TicTacToeGame(player1: Player) {
 
     private fun increaseWinnerScore() {
         activePlayer.score++
-        //updateViewsScore()
-        //showAlertDialog()
     }
 
 
@@ -92,6 +106,10 @@ class OfflineOnePlayerGame(player1: Player) : TicTacToeGame(player1) {
         return null
     }
 
+    override fun playAgain() {
+        resetGame()
+    }
+
 
     private fun autoMakeMove(): Boolean {
         val emptyTiles = mutableListOf<Int>()
@@ -113,8 +131,6 @@ class OfflineOnePlayerGame(player1: Player) : TicTacToeGame(player1) {
         return makeMove(tileNumber)
 
     }
-
-
 }
 
 class OfflineTwoPlayersGame(player1: Player, player2: Player) : TicTacToeGame(player1, player2) {
@@ -124,6 +140,10 @@ class OfflineTwoPlayersGame(player1: Player, player2: Player) : TicTacToeGame(pl
             return activePlayer
         return null
     }
+
+    override fun playAgain() {
+        resetGame()
+    }
 }
 
 class OnlineGame(player1: Player, player2: Player) : TicTacToeGame(player1, player2) {
@@ -131,12 +151,29 @@ class OnlineGame(player1: Player, player2: Player) : TicTacToeGame(player1, play
 
 
     override fun playGame(tileNumber: Int): Player? {
+        myRef.child("PlayerOnline").child(sessionID).child(numToString(tileNumber)).setValue(myEmail)
         return null
     }
 
-    override fun resetGame() {
-        super.resetGame()
+    override fun playAgain() {
+        resetGame()
         myRef.child("PlayerOnline").removeValue()
+    }
+
+    fun numToString(num: Int): String{
+        val str = when(num) {
+            1 -> "one"
+            2 -> "two"
+            3 -> "three"
+            4 -> "four"
+            5 -> "five"
+            6 -> "six"
+            7 -> "seven"
+            8 -> "eight"
+            9 -> "nine"
+            else -> ""
+        }
+        return str
     }
 
 }
